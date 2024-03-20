@@ -275,5 +275,8 @@ defaults:
       toc_sticky: true  # 페이지 내릴 때 고정되도록.
       toc_label: 목차  # toc name을 "목차" 라고 수정
       toc_icon: #
+      sidebar:
+        nav: "counts"
+
 
 date_format: "%Y-%m-%d"
