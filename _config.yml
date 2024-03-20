@@ -105,7 +105,7 @@ analytics:
 # Site Author
 author:
   name             : "Jun Young"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  avatar           : "images/avatar_image.jpg"
   bio              : "Programming Practice"
   location         : "South Korea"
   email            : # "lovislef@naver.com"
