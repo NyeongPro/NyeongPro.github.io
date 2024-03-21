@@ -56,7 +56,7 @@ FROM table
 
 ![img.png](/images/2024-03-21/all-column-select.png)
 
-### 1.1) SUM, MAX, MIN  
+### SUM, MAX, MIN  
 
 **각각 SUM(합), MAX(최댓값), MIN(최솟값) 을 구할 수 있는 집계함수.**
 
