@@ -22,3 +22,9 @@ docs:
   #   url: /collection-archive/
   # - title: "Sitemap"
   #   url: /sitemap/
+
+counts:
+  - title: "카테고리"
+    use: true
+  - title: "태그"
+    use: false
