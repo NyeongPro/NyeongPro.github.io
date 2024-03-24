@@ -1,0 +1,104 @@
+---
+layout: single
+title:  "[SQL]프로그래머스 SQL 고득점 KIT 배운 것들 정리"
+categories: study
+tag: [sql, 코테, 코딩테스트]
+redirect_from:
+  - /study/sqlkit_select_4  # categories 또는 md 파일 이름이 변경되더라도 이 포스트로 올 수 있도록 redirect
+---
+<span style="font-size: 20px;">
+**이전 포스팅에서 배운 것들을 계속 똑같이 포스팅 하기 보다  
+빠르게 부족한 정보만 기록하기 위한 포스팅**
+</span>
+{: .notice--info}
+
+# 1. [12세 이하인 여자 환자 목록 출력하기] 문제
+
+## NULL 일 때 바꾸고 싶은 값 출력하기
+
+이 경우 **ifnull** 을 사용해 쉽게 변경할 수 있다.
+
+if(컬럼, 바꾸고 싶은 값)을 활용한다.
+
+## 코드
+
+```sql
+SELECT PT_NAME, PT_NO, GEND_CD, AGE, ifnull(TLNO, 'NONE')
+FROM PATIENT
+WHERE AGE <= 12 AND GEND_CD = "W"
+ORDER BY AGE DESC, PT_NAME ASC
+```
+
+# 2. [조건에 부합하는 중고거래 댓글 조회하기] 문제
+
+## 배우고 깨달은 점
+
+### 첫 번째
+
+**AS로 이름 변경할 때 내가 알아볼 수 있도록 이름을 바꿀 것**
+{: .notice--success}
+
+단순히 AS A, AS B 로 바꾸니 내가 알아볼 수 없어서 문제를 해석할 때 
+
+시간이 오래걸림.
+
+### 두 번째
+
+날짜 형식을 조건에서 물을 때 여러가지 방법을 사용할 수 있다.
+
+#### 1) LIKE 구문
+
+**WHERE B.CREATED_DATE like '2022-10%'** 와 같이 사용할 수 있다.
+
+LIKE 구문은 아래와 같이 사용한다.
+
+ABC로 시작하는 데이터
+```sql
+select * from table
+where title like 'ABC%'
+```
+
+ABC로 끝나는 데이터
+```sql
+select * from table
+where title like '%ABC'
+```
+
+ABC가 들어가는 데이터
+```sql
+select * from table
+where title like '%ABC%'
+```
+
+주의사항  
+'% ABC %' 와 같이 공백도 포함하기 때문에 주의한다.  
+{: .notice--danger}
+
+#### 2)  SUBSTR 구문
+
+**WHERE SUBSTR(B.CREATED_DATE, 1, 7)** 와 같이 사용할 수 있다.  
+
+SUBSTR(= SUBSTRING)은 3가지 인자가 들어간다.
+
+SUBSTR(str, pos, len) 이다.  
+
+>str : 원본 문자열
+pos : 시작 위치값
+len : 가져올 길이값  
+
+```sql
+SELECT SUBSTR('가나다라마바사', 1, 5)
+```
+
+'가나다라마바사' 라는 문자열에서 첫 번째부터 5개 길이를 가져온다는 의미이다.
+
+따라서 결과는 '가나다라마' 가 될 것이다.
+
+# 참고 사이트
+[[프로그래머스] SQL 문제풀이 - 12세 이하인 여자 환자 목록 출력하기](https://whdgus928.tistory.com/79)  
+
+[MySQL like문 (특정 문자 포함되어있는지 검색)](https://bactoria.tistory.com/22)  
+
+[[프로그래머스/SQL]  - (1) 조건에 부합하는 중고거래 댓글 조회하기](https://lungfish.tistory.com/entry/%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%A8%B8%EC%8A%A4SQL-%EC%A1%B0%EA%B1%B4%EC%97%90-%EB%B6%80%ED%95%A9%ED%95%98%EB%8A%94-%EC%A4%91%EA%B3%A0%EA%B1%B0%EB%9E%98-%EB%8C%93%EA%B8%80-%EC%A1%B0%ED%9A%8C%ED%95%98%EA%B8%B0)  
+
+[[MySQL] 7장 조인 : JOIN (INNER, LEFT, RIGHT)](https://futurists.tistory.com/17)
