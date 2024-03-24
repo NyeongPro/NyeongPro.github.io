@@ -1,0 +1,133 @@
+---
+layout: single
+title:  "[SQL]프로그래머스 SQL 고득점 KIT(3월에 태어난 여성 회원 목록 출력하기)"
+categories: study
+tag: [sql, 코테, 코딩테스트]
+redirect_from:
+  - /study/sqlkit_select_2  # categories 또는 md 파일 이름이 변경되더라도 이 포스트로 올 수 있도록 redirect
+---
+
+# 문제
+
+>MEMBER_PROFILE 테이블에서 생일이 3월인 여성 회원의 ID, 이름, 성별, 생년월일을 조회하는 SQL문을 작성해주세요. 이때 전화번호가 NULL인 경우는 출력대상에서 제외시켜 주시고, 결과는 회원ID를 기준으로 오름차순 정렬해주세요.
+
+# 고찰
+
+## 생일이 3월인 여성 회원
+
+WHERE 사용으로 조건을 걸어야겠다.
+
+이전 포스팅에서 배운 date_format을 활용해서 3월 형태를 만들어야 할 것 같다.
+
+date_format에 "%m"만 들어가도 출력이 잘 되는지 먼저 확인하기 위해
+select에서 출력해보았다.
+
+```
+SELECT MEMBER_ID, MEMBER_NAME, GENDER, DATE_FORMAT(DATE_OF_BIRTH, '%m') as DATE_OF_BIRTH
+FROM MEMBER_PROFILE
+```
+
+![img.png](/images/2024-03-22/date_format_m.png)  
+
+02, 08 등등으로 잘 출력된다. 
+
+하지만 아직 이게 숫자인지 글자 형태인지는 모르겠다.
+
+이를 확인하기 위해 두 가지를 비교하려 한다.
+
+### 조회된 date_format이 CHAR인가 INT인가
+
+#### 1. 'CHAR' 라고 가정
+```
+SELECT MEMBER_ID, MEMBER_NAME, GENDER, DATE_FORMAT(DATE_OF_BIRTH, '%m') as DATE_OF_BIRTH
+FROM MEMBER_PROFILE
+WHERE DATE_FORMAT(DATE_OF_BIRTH, '%m') = "02"
+```
+
+#### 2. 'INT' 라고 가정
+```
+SELECT MEMBER_ID, MEMBER_NAME, GENDER, DATE_FORMAT(DATE_OF_BIRTH, '%m') as DATE_OF_BIRTH
+FROM MEMBER_PROFILE
+WHERE DATE_FORMAT(DATE_OF_BIRTH, '%m') = "02"
+```
+
+놀랍게도 ""를 붙이든 없애든 둘 다 잘 출력이 된다...
+{: .notice--danger}
+
+>GENDER로 확인해보니 GENDER는 확실히 CHAR 타입이라
+WHERE 절에서 "M"과 같이 따옴표를 붙여야 정상 작동한다.  
+하지만 date_format으로 나온 %m의 값은 ""를 붙이든 아니든 정상 작동한다...
+이유는 추가적으로 찾아봐야할 것 같다.
+
+추가적으로 %c를 사용하면 0,1 2, ..., 12 와 같이 자릿수에 맞게 출력된다.  
+01, 02와 같은 포맷이 필요한 게 아니라면 %c를 사용하면 될 것 같다.
+{: .notice--info}
+
+## 전화번호가 NULL 인 경우 제외
+
+간단히 WHERE 절에서 != 를 활용해 아래와 같이 사용하면 될 줄 알았다.
+```
+WHERE TLNO != NULL
+```
+하지만 위와 같이 WHERE 절을 사용하면 필드만 출력되고 아무런 데이터가 출력되지 않는다.
+
+서칭 결과 NULL 값이 아닌 데이터를 확인할 때는 IS NOT null을 사용해야한다.
+
+따라서 아래와 같이 사용하면 될 것 같다.
+
+```
+SELECT MEMBER_ID, MEMBER_NAME, GENDER, DATE_FORMAT(DATE_OF_BIRTH, '%m') as DATE_OF_BIRTH
+FROM MEMBER_PROFILE
+WHERE TLNO IS NOT NULL
+```
+
+## 회원ID를 기준으로 오름차순
+
+```
+ORDER BY MEMBER_ID ASC 를 추가하면 될 것 같다.
+```
+# 코드 실행
+
+```
+SELECT MEMBER_ID, MEMBER_NAME, GENDER, DATE_FORMAT(DATE_OF_BIRTH, '%Y-%m-%d') as DATE_OF_BIRTH
+FROM MEMBER_PROFILE
+WHERE DATE_FORMAT(DATE_OF_BIRTH, '%c') = 3 AND GENDER = 'W' AND TLNO IS NOT NULL
+ORDER BY MEMBER_ID ASC
+```
+위의 코드로 실행시켜 성공했다.
+
+> * DATE_FORMAT 활용을 잘해야겠다.  
+> * 또한 WHERE 절에서 DATE_FORMAT으로 뽑아온 값은 따옴표에 상관없이 가능하다.  
+> * CHAR를 WHERE 절에서 비교할 때는 "" 가 필수적이다.
+> * '%c'를 사용하면 월을 0, 1, 2, ..., 12 로 뽑아낼 수 있다.
+
+# 추가
+
+추가적인 공부를 위해 다른 분의 코드를 참고하였음.  
+내 코드에서 date_format에서 월을 뽑아내기 위해 아래와 같이 사용하였음  
+```
+WHERE DATE_FORMAT(DATE_OF_BIRTH, '%c') = 3
+```
+
+하지만 YEAR(DATE), MONTH(DATE), DAY(DATE)를 사용하면  
+쉽게 년, 월, 일을 추출할 수 있다.
+
+따라서 내 코드의 월을 추출하는 부분을 수정할 수 있다.
+```
+SELECT MEMBER_ID, MEMBER_NAME, GENDER, DATE_FORMAT(DATE_OF_BIRTH, '%Y-%m-%d') as DATE_OF_BIRTH
+FROM MEMBER_PROFILE
+WHERE DATE_FORMAT(DATE_OF_BIRTH, '%c') = 3 
+      AND GENDER = 'W' 
+      AND TLNO IS NOT NULL
+ORDER BY MEMBER_ID ASC
+--------------------수정 후--------------------
+SELECT MEMBER_ID, MEMBER_NAME, GENDER, DATE_FORMAT(DATE_OF_BIRTH, '%Y-%m-%d') as DATE_OF_BIRTH
+FROM MEMBER_PROFILE
+WHERE MONTH(DATE_OF_BIRTH) = 3 
+      AND GENDER = 'W' 
+      AND TLNO IS NOT NULL
+ORDER BY MEMBER_ID ASC
+```
+
+# 참고 사이트
+[[MYSQL] 쿼리문에서 NULL 값 체크 및 값 변경](https://devit.koreacreatorfesta.com/entry/MYSQL-%EC%BF%BC%EB%A6%AC%EB%AC%B8%EC%97%90%EC%84%9C-NULL-%EA%B0%92-%EC%B2%B4%ED%81%AC-%EB%B0%8F-%EA%B0%92-%EB%B3%80%EA%B2%BD)
