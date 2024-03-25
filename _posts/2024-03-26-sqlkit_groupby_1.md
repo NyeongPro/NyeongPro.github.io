@@ -1,0 +1,237 @@
+---
+layout: single
+title:  "[SQL]프로그래머스 SQL 고득점 KIT 배운 것들 정리5"
+categories: sql
+tag: [sql, 코테, 코딩테스트]
+redirect_from:
+  - /study/sqlkit_groupby_1 # categories 또는 md 파일 이름이 변경되더라도 이 포스트로 올 수 있도록 redirect
+---
+
+# 1. [조건에 맞는 사용자와 총 거래금액 조회하기] 문제
+
+## 고찰
+
+join 구문을 사용해서 두 테이블을 결합  
+
+ON 조건에서 USER_ID와 WRITER_ID를 통해 결합함.  
+
+where에서 status가 DONE인 것만을 조회함.  
+
+group by를 사용해 같은 이름을 가진 사용자를 묶는다.  
+
+묶고 난 뒤에 having 절에서 총 금액이 70만원 이상인 사용자 이외는 거른다.  
+
+order by 를 사용자 총 금액에 대해 오름차순으로 정렬한다. 
+
+## 코드 실행
+
+```sql
+SELECT us.USER_ID, us.NICKNAME, sum(bd.PRICE) as TOTAL_SALES
+from USED_GOODS_USER as us
+left join USED_GOODS_BOARD as bd
+on us.USER_ID = bd.WRITER_ID
+where status = 'DONE'
+group by USER_ID
+having sum(bd.PRICE) >= 700000
+order by sum(bd.PRICE) asc
+```
+## 추가
+
+### 아쉬운점
+이렇게 쉽게 될 줄은 몰랐는데 생각한대로 코드를 짜니 곧바로 성공했다.  
+다만 문제에서 완료된 중고 거래를 못봐서 where절에서 status를 done으로 두는 것을 깜빡했다.  
+또한 70만원 이상이었는데 70만원 초과와 같이 코드를 짰다.  
+금방 발견했지만 이런 사소한 것도 잘 신경써야겠다.    
+
+### 배운점
+
+select 에서 as 구문을 통해 이름을 변경했으면 아래에서도 그대로 사용할 수 있다.
+
+
+# 2. [저자 별 카테고리 별 매출액 집계하기] 문제
+
+## 풀이
+
+테이블이 3개 엮이니 생각하기 쉽지 않네요.
+
+```sql
+SELECT newbook.AUTHOR_ID, newbook.AUTHOR_NAME, newbook.CATEGORY, newbook.PRICE * bs.SALES as TOTAL_SALES
+from (select b.BOOK_ID, b.CATEGORY, b.AUTHOR_ID, b.PRICE, a.AUTHOR_NAME
+      from BOOK as b left join AUTHOR as a
+      ON b.AUTHOR_ID = a.AUTHOR_ID) as newbook
+left join BOOK_SALES as bs
+on newbook.BOOK_ID = bs.BOOK_ID
+where date_format(bs.SALES_DATE, '%Y-%m') = '2022-01'
+group by AUTHOR_NAME, CATEGORY
+order by AUTHOR_ID asc, CATEGORY desc
+```
+일단 위와 같이 from 절에서 서브쿼리를 통해 
+BOOK 테이블과 AUTHOR 테이블을 묶어서 
+필요한 정보를 가진 서브 테이블을 하나 만든다고 생각했습니다.
+그 테이블을 newbook이라고 지칭하고 첫 줄 select 에서 조회할 필드에 대해 newbook.[] 을 통해 모두 조회했습니다.
+
+where 절에서 2022-01에 대한 조건을 걸었습니다.  
+
+group by를 통해 AUTHOR_NAME, CATEGORY를 그룹지었습니다.
+
+order by로 문제에 부합하는 정렬을 했습니다.
+
+![img.png](/images/2024-03-26/problem-result-img.png)
+
+위 이미지처럼 문제 조건에 부합하는 것처럼 결과가 나오긴 했지만 제출하니 실패했습니다.  
+
+## 해결 코드
+
+```sql
+SELECT newbook.AUTHOR_ID, newbook.AUTHOR_NAME, newbook.CATEGORY, sum(newbook.PRICE * bs.SALES) as TOTAL_SALES
+from (select b.BOOK_ID, b.CATEGORY, b.AUTHOR_ID, b.PRICE, a.AUTHOR_NAME
+      from BOOK as b left join AUTHOR as a
+      ON b.AUTHOR_ID = a.AUTHOR_ID) as newbook
+left join BOOK_SALES as bs
+on newbook.BOOK_ID = bs.BOOK_ID
+where date_format(bs.SALES_DATE, '%Y-%m') = '2022-01'
+group by AUTHOR_NAME, CATEGORY
+order by AUTHOR_ID asc, CATEGORY desc
+```
+
+아래 부분 sum 함수만 추가해서 해결했습니다.
+```sql
+newbook.PRICE * bs.SALES
+-----------------------------
+sum(newbook.PRICE * bs.SALES)
+```
+
+당연히 날짜에 따라 판매된 것을 합쳐줬어야 했는데 sum을 빼먹었네요.
+
+## 추가 공부
+
+### 테이블 3개 이상 문제.
+JOIN 을 사용할 때 두 테이블만 엮을 수 있을 것 같아서 from 절에서 서브쿼리를 이용해 해결했습니다.
+하지만 다른 블로그를 참고하니 JOIN을 여러개 엮을 수 있네요?
+서브쿼리를 사용하면 처리 속도도 느려지고 제가 생각할 때도 복잡하니 서브쿼리 사용을 지양해야겠습니다.
+테이블 여러 개를 한 번에 JOIN 할 수 있다는 것을 이제 알았으니 다음 문제부터는 
+이런 상황에 서브쿼리 사용을 덜 할 수 있겠네요.
+
+### 날짜 비교
+date_format 사용이 익숙해 where 절에서 '%Y-%m' = '2022-01' 과 같이 주로 사용합니다.
+이런 경우 `YEAR(date) = 2022 AND MONTH(date) = 1` 과 같이 사용할 수도 있다.
+
+# 3. [자동차 종류 별 특정 옵션이 포함된 자동차 수 구하기] 문제
+
+## 코드
+```sql
+SELECT CAR_TYPE, count(CAR_TYPE) as CARS
+from CAR_RENTAL_COMPANY_CAR 
+where (OPTIONS like '%통풍시트%' 
+     or OPTIONS like '%가죽시트%' 
+     or OPTIONS like '%열선시트%')
+group by CAR_TYPE
+order by CAR_TYPE asc
+```
+## 풀이
+
+where 에서 OPTIONS 문자열에서 통풍시트, 가죽시트, 열선시트가 하나라도 포함되있는 조건을 OR을 통해서 만들었음.  
+
+group by를 통해 차종 별로 그룹화했다.  
+
+oder by를 통해 오름차순 정렬하였다.
+
+예시에서 하나 이상의 옵션이 포함된 자동차 ID가 1, 2, 4, 5라고 해서
+where 조건에 CAR_ID in (1, 2, 4, 5)를 넣는 바람에 계속해서 틀려서 애를 먹었다...  
+
+예시에서 표현한 숫자일 뿐인데 이 문구에 꽂혀서 where 절에서 계속해서 1, 2, 4, 5로 먼저 거르고 시작해서 계속해서 틀렸었다.  
+
+## 추가
+
+sql에서도 정규표현식을 사용할 수 있다.
+
+내가 푼 where 절에서 like를 사용해 총 3개의 시트에 대해 모두 비교하였다.  
+
+정규표현식을 사용한다면 아래와 같이 where 절을 수정할 수 있다.
+
+```sql
+where OPTIONS regexp '통풍시트|열선시트|가죽시트'
+```
+
+### 정규표현식 추가
+
+#### 1) . : 문자 하나
+예시) "...."  
+
+네 글자 이상의 문자열을 찾음.
+
+#### 2) | : or의 의미
+예시) "A|B|C"  
+
+A 혹은 B 혹은 C를 가진 문자열을 찾음
+
+#### 3) ^ : 시작하는 문자열
+예시) "^아침"  
+
+아침으로 시작하는 문자열을 찾음
+
+#### 4) $ : 끝나는 문자열
+예시) "저녁&"  
+
+저녁으로 끝나는 문자열을 찾음
+
+#### 5) [A-z] : 알파벳 대문자와 소문자 문자열 포함 여부
+
+#### 6) [0-9] : 숫자 포함 여부
+
+정규표현식은 활용에 따라 무궁무진하기 때문에 기본적인 것은 알고있되 필요할 때 찾아쓰자.  
+{: .notice--success}
+
+
+# 4. [성분으로 구분한 아이스크림 총 주문량] 문제
+## 코드
+```sql
+SELECT II.INGREDIENT_TYPE, sum(FH.TOTAL_ORDER) as TOTAL_ORDER
+from FIRST_HALF as FH
+left join ICECREAM_INFO as II
+ON FH.FLAVOR = II.FLAVOR
+group by INGREDIENT_TYPE
+order by TOTAL_ORDER asc
+```
+## 풀이
+FLAVOR 필드를 통해 left join 하였다.  
+group by 를 통해 각 성분 타입에 맞게 그룹화 하였다.  
+order by 를 통해 오름차순 정렬하였다.  
+sum 구문을 통해 각 그룹별로 집계하였다.  
+
+# 5. [즐겨찾기가 가장 많은 식당 정보 출력하기] 문제
+## 코드
+```sql
+SELECT FOOD_TYPE, REST_ID, REST_NAME, FAVORITES
+from REST_INFO
+where (FOOD_TYPE, FAVORITES)
+IN (select FOOD_TYPE, max(FAVORITES) from REST_INFO group by FOOD_TYPE)
+order by FOOD_TYPE desc
+```
+## 풀이
+풀이 방법이 도저히 생각이 안나서 다른 블로그를 참고했다.
+
+서브쿼리를 이용해서 각 음식 종류 별 즐겨찾기 수가 가장 많은 테이블을 만든다.
+
+```sql
+select max(FAVORITES) from REST_INFO group by FOOD_TYPE
+```
+![img.png](/images/2024-03-26/problem-middle-result-img.png)  
+
+이제 이 테이블의 정보와 들어맞는 행만 골라서 최종적으로 결과를 출력하면 된다.  
+
+IN 구문을 사용해서 음식 종류와 즐겨찾기가 들어맞는 행을 where 절에서 찾는다.  
+
+where (A, B) IN (A', B') 와 같이 코드 사용이 가능한 것 같다.
+조건에 들어맞는 행을 여러 줄 출력할 때 잘 사용할 것 같다.  
+기존 LIMIT을 통해 조건에 들어맞는 한 줄 출력은 쉽게 해결했지만  
+여러 줄 출력은 이걸 사용하면 되겠다.  
+잘 익히도록 하자.
+{: .notice--info}
+
+# 참고 사이트
+[[SQL연습] 저자 별 카테고리 별 매출액 집계하기 - 프로그래머스](https://velog.io/@sheltonwon/SQL%EC%97%B0%EC%8A%B5-%EC%A0%80%EC%9E%90-%EB%B3%84-%EC%B9%B4%ED%85%8C%EA%B3%A0%EB%A6%AC-%EB%B3%84-%EB%A7%A4%EC%B6%9C%EC%95%A1-%EC%A7%91%EA%B3%84%ED%95%98%EA%B8%B0-%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%A8%B8%EC%8A%A4)  
+
+[[SQL] 자동차 종류 별 특정 옵션이 포함된 자동차 수 구하기(프로그래머스/MySQL/Level 2)](https://kkw-da.tistory.com/entry/SQL-%EC%9E%90%EB%8F%99%EC%B0%A8-%EC%A2%85%EB%A5%98-%EB%B3%84-%ED%8A%B9%EC%A0%95-%EC%98%B5%EC%85%98%EC%9D%B4-%ED%8F%AC%ED%95%A8%EB%90%9C-%EC%9E%90%EB%8F%99%EC%B0%A8-%EC%88%98-%EA%B5%AC%ED%95%98%EA%B8%B0%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%A8%B8%EC%8A%A4MySQLLevel-2)  
+
+[[프로그래머스]즐겨찾기가 가장 많은 식당 정보 출력하기](https://velog.io/@nn1co1/%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%A8%B8%EC%8A%A4%EC%A6%90%EA%B2%A8%EC%B0%BE%EA%B8%B0%EA%B0%80-%EA%B0%80%EC%9E%A5-%EB%A7%8E%EC%9D%80-%EC%8B%9D%EB%8B%B9-%EC%A0%95%EB%B3%B4-%EC%B6%9C%EB%A0%A5%ED%95%98%EA%B8%B0)
