@@ -1,0 +1,142 @@
+---
+layout: single
+title:  "[SQL]프로그래머스 SQL 고득점 KIT3"
+categories: study
+tag: [sql, 코테, 코딩테스트]
+redirect_from:
+  - /study/sqlkit_summaxmin_1  # categories 또는 md 파일 이름이 변경되더라도 이 포스트로 올 수 있도록 redirect
+---
+
+# 1. [가장 비싼 상품 구하기] 문제
+
+## 코드 실행
+```sql
+SELECT max(PRICE) as MAX_PRICE
+from PRODUCT
+```
+
+위와 같이 간단하게 해결하였다.  
+
+
+# 2. [가격이 제일 비싼 식품의 정보 출력하기] 문제
+
+## 고찰
+
+각 열마다 제일 비싼 식품의 정보를 가져와야한다.
+하지만 PRICE를 제외하고 MAX를 사용할 수 없고,
+PRICE의 조건에 따라서 같은 행의 다른 필드도 조회해야하기 때문에 고민이 좀 됐다.  
+
+해결 방법이 떠오르지 않아 조사를 해봤다.  
+
+풀이 방법에는 크게 두 가지가 있었다.
+
+### 1. LIMIT 사용으로 조회할 행의 개수 조절
+
+ORDER BY를 통해 오름차순 또는 내림차순으로 정렬하고 조회를 원하는 행의 수만큼 LIMIT을 설정한다.
+
+### 2. MAX함수와 **서브쿼리** 사용
+
+서브쿼리에 대해 정보처리기사를 공부할 때 어느정도 익혔지만 전혀 생각이 나지 않았다.  
+
+서브쿼리를 통해 WHERE 절에서 PRICE에 대한 조건을 좀 더 풍부하게 만들어낼 수 있다.
+
+이를 몰랐을 때는 MAX(PRICE) = PRICE 와 같은 문구를 만들고자  
+
+HAVING절도 써보고 WHERE 절에서도 도전해봤으나 되지 않았다.  
+
+서브쿼리를 통해 해결하면 가능했다.  
+
+## 코드 실행
+
+### 1. ORDER BY와 LIMIT 사용
+```sql
+select *
+from FOOD_PRODUCT
+ORDER BY PRICE DESC
+LIMIT 1;
+```
+
+### 2. MAX 함수와 서브쿼리 사용
+```sql
+select *
+from FOOD_PRODUCT
+where PRICE = (select MAX(PRICE) from FOOD_PRODUCT)
+```
+
+## 추가
+
+서브쿼리 추가 공부
+{: .notice--info}
+
+### 1. 서브쿼리?
+
+다른 테이블의 값을 기준으로 한 테이블에서 데이터를 검색할 수 있도록  
+다른 쿼리 내부에 중첩된 커리  
+
+데이터 필터링, 정렬, 또는 그룹화 같은 다양한 방법으로 사용.
+
+### 2. 서브쿼리 사용 이점
+
+* 파생 테이블로 사용하여 더 큰 쿼리에서 다른 테이블과 조인
+* 집계 함수를 계산하거나 데이터의 하위 집합에 대한 계산 수행
+* 연관된 서브쿼리에서 두 테이블의 데이터를 행렬로 비교
+* 외부 쿼리에서 직접 액세스 할 수 없는 테이블에서 데이터 검색
+
+### 3. 서브쿼리 사용 방법
+
+먼저 사용할 테이블 이미지는 아래와 같습니다.  
+
+![img.png](/images/2024-03-25/product-table.png)
+
+
+#### 3.1 SELECT 절
+
+* 특정 단일 값이 필요할 때
+* 다중 값을 결과 셋에 표현할 경우, 에러 출력
+
+```sql
+SELECT ID, (SELECT ID FROM 상품 LIMIT 1)
+FROM 상품
+```
+![img.png](/images/2024-03-25/subquery-select-ex.png)
+
+만일 LIMIT 2 라고 설정하면 에러 출력  
+상식적으로 생각해봐도 두 줄이 출력되는 서브쿼리를 한 행에 우겨넣어야하므로 오류 발생
+{: .notice--danger}
+
+#### 3.2 FROM 절
+
+```sql
+SELECT a.*
+FROM (SELECT 가격 FROM 상품) AS a
+```
+
+![img.png](/images/2024-03-25/from-subquery-ex.png)
+
+select a.* 을 했음에도 가격 열만 나온 이유는 from 절에서 서브쿼리를 통해 가격 열만 있는 테이블을 새로 하나 서브로 뽑아온것이고 그 테이블에서 모든 열을 조회하도록 했으므로 저렇게 뜬다.  
+
+#### 3.3 WHERE 절
+
+* 특정 단일 값이 필요할 때 사용
+* 다중 값을 결과 셋에 표현할 경우, 에러 출력
+
+예시, 상품 테이블에서 가격이 가장 비싼 상품의 ID, 상품명, 가격 출력
+
+```sql
+SELECT *
+FROM 상품
+WHERE 가격 = (SELECT max(가격) FROM 상품)
+```
+
+1. select *이므로 전부 조회한다. 즉, ID, 상품명, 가격을 모두 조회할 것이다.
+2. from 상품, 상품 테이블을 조회한다.
+3. where 절에서 가격이 제일 비싼 행에 대한 조건을 건다.
+4. 서브쿼리에서 `select max(가격) from 상품`으로 서브 테이블을 만들어 가장 큰 값을 가진 가격에 대한 행을 만들었다.  
+그리고 그것이 가격과 같다는 조건을 걸어 가격이 제일 큰 행에 대한 조건을 성립시킨다.
+
+![img.png](/images/2024-03-25/subquery-max(price)-ex.png)
+
+
+# 참고 사이트
+[[MYSQL] 가격이 제일 비싼 식품의 정보 출력하기](https://suminii.tistory.com/entry/MYSQL-%EA%B0%80%EA%B2%A9%EC%9D%B4-%EC%A0%9C%EC%9D%BC-%EB%B9%84%EC%8B%BC-%EC%8B%9D%ED%92%88%EC%9D%98-%EC%A0%95%EB%B3%B4-%EC%B6%9C%EB%A0%A5%ED%95%98%EA%B8%B0)
+[SQL - 서브쿼리(SubQuery)의 개념, 사용하는 이유, 특징, 사용 방법](https://luvris2.tistory.com/514#google_vignette)
