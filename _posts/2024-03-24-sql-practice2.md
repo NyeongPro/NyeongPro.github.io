@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "[SQL]코테 대비 SQL 공부2"
-categories: study
+categories: sql
 tag: [sql, 코테, 코딩테스트]
 redirect_from:
   - /study/sql-practice  # categories 또는 md 파일 이름이 변경되더라도 이 포스트로 올 수 있도록 redirect

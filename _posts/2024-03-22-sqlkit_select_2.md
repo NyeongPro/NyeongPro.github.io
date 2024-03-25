@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "[SQL]프로그래머스 SQL 고득점 KIT(3월에 태어난 여성 회원 목록 출력하기)"
-categories: study
+categories: sql
 tag: [sql, 코테, 코딩테스트]
 redirect_from:
   - /study/sqlkit_select_2  # categories 또는 md 파일 이름이 변경되더라도 이 포스트로 올 수 있도록 redirect
