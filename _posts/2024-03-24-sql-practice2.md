@@ -131,7 +131,7 @@ ON product.id = detail.id
 > 이때 LEFT 조인을 하면 LEFT 테이블 기준으로 조건에 맞는 필드가 JOIN되고  
 > 그 반대도 마찬가지이다.
 
-그래서 **[A LEFT JOIN B]과 [B LEFT JOIN A]**는 완전히 같은 식이 된다.
+그래서 **[A LEFT JOIN B]과 [B RIGH JOIN A]**는 완전히 같은 식이 된다.
 {: .notice--info}
 
 LEFT JOIN과 RIGHT JOIN을 집합 관계로 표현하면 아래과 같겠다.  

@@ -159,12 +159,9 @@ def solution(sizes):
 
 먼저 각 요소의 첫 번째 인덱스 기준으로 정렬하고 첫 번째 인덱스 값이 가장 큰 것을 기본 명함 크기로 잡았다.  
 그 이후 4가지 조건에 맞게 지갑 가로, 세로 max 사이즈를 정하였다.
-* 새로운 명함이 현재 지갑 max 사이즈에 비해 가로, 세로 둘 다 작은 경우  
--> 아무런 변화없이 명함이 잘 들어갈 것.
-* 새로운 명함이 지갑 max 사이즈 대비 가로, 세로 둘 다 큰 경우
--> max 사이즈를 모두 변경한다.
-* 새로운 명함의 한 사이즈가 큰 경우
--> 가로, 세로 중 하나를 변경한다.
+* 새로운 명함이 현재 지갑 max 사이즈에 비해 가로, 세로 둘 다 작은 경우 -> 아무런 변화없이 명함이 잘 들어갈 것.
+* 새로운 명함이 지갑 max 사이즈 대비 가로, 세로 둘 다 큰 경우 -> max 사이즈를 모두 변경한다.
+* 새로운 명함의 한 사이즈가 큰 경우 -> 가로, 세로 중 하나를 변경한다.
 
 코드를 짜면서도 너무 비효율적이라 생각했다.  
 좀 더 좋은 방안이 있을 것 같다.
@@ -183,7 +180,7 @@ sizes에서 한 요소를 뽑고 가로, 세로 중 큰 값을 모은다.
 그 모은 값에서 가장 큰 값을 고른다.
 
 이후 한 요소를 뽑고 가로, 세로 중 작은 값을 모은다.  
-그 모은 값에서 가장 작은 값을 고른다.  
+그 모은 값에서 가장 큰 값을 고른다.  
 
 그리고 그 값을 곱하면 답이된다.  
 
@@ -473,12 +470,12 @@ def solution(numbers, target):
     dfs(0, numbers, target, 0)
     return answer
 ```
-numbers = [4, 1, 2, 1] 일 때
-dfs(0, numbers, target, value+numbers[idx])
-dfs(1, numbers, target, value+numbers[idx])
-dfs(2, numbers, target, value+numbers[idx])
-dfs(3, numbers, target, value+numbers[idx])
-----------------------------------------------
+numbers = [4, 1, 2, 1] 일 때  
+dfs(0, numbers, target, value+numbers[idx])  
+dfs(1, numbers, target, value+numbers[idx])  
+dfs(2, numbers, target, value+numbers[idx])  
+dfs(3, numbers, target, value+numbers[idx])  
+----------------------------------------------  
 dfs(4, numbers, target, value+numbers[idx]) 일 때 idx와 len(numbers) 같아진다.  
 그리고 else: 의 dfs로 가기전에 return 으로 걸러진다.   
 그리고 target이 맞는지 아닌지 확인하고 맞다면 글로벌 변수에 1이 더해진다.
