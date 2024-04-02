@@ -4,7 +4,7 @@ title:  "[Algorithm]프로그래머스 프로세스 문제[파이썬 Python]"
 categories: algorithm
 tag: [algorithm, 코테, 코딩테스트, 파이썬, python]
 redirect_from:
-  - /algorithm/algorithmkit1
+  - /algorithm/algorithmkit12
 ---
 
 # [프로세스] 문제
