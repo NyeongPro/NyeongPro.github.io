@@ -1,14 +1,14 @@
 ---
 layout: single
-title:  "[Algorithm]프로그래머스 코딩테스트 고득점 KIT 여러 문제1[파이썬 Python]"
+title:  "[Algorithm]프로그래머스 OOOO 문제[파이썬 Python]"
 categories: algorithm
 tag: [algorithm, 코테, 코딩테스트, 파이썬, python]
 redirect_from:
-  - /algorithm/algorithmkit1
+  - /algorithm/algorithmkitOOOOOOOOOO
 published: false
 ---
 
-# OOOO. [] 문제
+# [] 문제
 ## 코드
 ## 풀이
 ## 추가
